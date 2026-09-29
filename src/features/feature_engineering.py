@@ -1,4 +1,3 @@
-# feature engineering
 import numpy as np
 import pandas as pd
 import os
@@ -7,9 +6,7 @@ import yaml
 from src.logger import logging
 import pickle
 
-
 def load_params(params_path: str) -> dict:
-    """Load parameters from a YAML file."""
     try:
         with open(params_path, 'r') as file:
             params = yaml.safe_load(file)
@@ -26,7 +23,6 @@ def load_params(params_path: str) -> dict:
         raise
 
 def load_data(file_path: str) -> pd.DataFrame:
-    """Load data from a CSV file."""
     try:
         df = pd.read_csv(file_path)
         df.fillna('', inplace=True)
@@ -59,6 +55,7 @@ def apply_bow(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features: i
         test_df = pd.DataFrame(X_test_bow.toarray())
         test_df['label'] = y_test
 
+        os.makedirs('models', exist_ok=True)
         pickle.dump(vectorizer, open('models/vectorizer.pkl', 'wb'))
         logging.info('Bag of Words applied and data transformed')
 
@@ -81,7 +78,6 @@ def main():
     try:
         params = load_params('params.yaml')
         max_features = params['feature_engineering']['max_features']
-        # max_features = 20
 
         train_data = load_data('./data/interim/train_processed.csv')
         test_data = load_data('./data/interim/test_processed.csv')

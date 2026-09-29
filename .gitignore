@@ -2,3 +2,6 @@ local_s3
 __pycache__/
 raw
 logs
+interim
+processed
+models
