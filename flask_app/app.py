@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import mlflow
+from mlflow.exceptions import MlflowException
 import pickle
 import os
 import pandas as pd
@@ -76,16 +77,30 @@ model_name = "my_model"
 # model serving
 def get_latest_model_version(model_name):
     client = mlflow.MlflowClient()
+    try:
+        return client.get_model_version_by_alias(model_name, "staging").version
+    except MlflowException:
+        pass
+
     latest_version = client.get_latest_versions(model_name, stages=["Production"])
+    if not latest_version:
+        latest_version = client.get_latest_versions(model_name, stages=["Staging"])
     if not latest_version:
         latest_version = client.get_latest_versions(model_name, stages=["None"])
     return latest_version[0].version if latest_version else None
 
 model_version = get_latest_model_version(model_name)
+if model_version is None:
+    raise RuntimeError(
+        f"No registered version found for '{model_name}'. Run model registration first."
+    )
 model_uri = f'models:/{model_name}/{model_version}'
 print(f"Fetching model from: {model_uri}")
 model = mlflow.pyfunc.load_model(model_uri)
-vectorizer = pickle.load(open('models/vectorizer.pkl', 'rb'))
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+vectorizer_path = os.path.join(project_root, 'models', 'vectorizer.pkl')
+with open(vectorizer_path, 'rb') as vectorizer_file:
+    vectorizer = pickle.load(vectorizer_file)
 
 
 @app.route("/")
