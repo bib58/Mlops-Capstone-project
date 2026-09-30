@@ -5,3 +5,4 @@ interim
 processed
 models/model.pkl
 models/vectorizer.pkl
+.env
