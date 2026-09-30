@@ -39,8 +39,16 @@ def register_model(model_name: str, model_info: dict):
             version=model_version.version,
             stage="Staging"
         )
+        client.set_registered_model_alias(
+            name=model_name,
+            alias='staging',
+            version=model_version.version
+        )
         
-        logging.debug(f'Model {model_name} version {model_version.version} registered and transitioned to Staging.')
+        logging.debug(
+            f'Model {model_name} version {model_version.version} registered '
+            'with Staging stage and staging alias.'
+        )
     except Exception as e:
         logging.error('Error during model registration: %s', e)
         raise
