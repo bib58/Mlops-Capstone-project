@@ -1,16 +1,16 @@
 import json
 import mlflow
+import dagshub
 import logging
 from src.logger import logging
 import os
-import dagshub
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
 
-mlflow.set_tracking_uri('-----------------------------------')
-dagshub.init(repo_owner='---------', repo_name='-----------', mlflow=True)
+mlflow.set_tracking_uri('https://dagshub.com/bibhukumarsingh355/Mlops-Capstone-project.mlflow')
+dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
 
 
 def load_model_info(file_path: str) -> dict:
