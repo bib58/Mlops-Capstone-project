@@ -45,8 +45,6 @@ jobs:
 
       - name: Run Flask app tests
         if: success()
-        env:
-          CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
         run: |
           python -m tests.test_flask_app
 
