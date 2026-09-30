@@ -11,6 +11,7 @@ import os
 from src.logger import logging
 
 mlflow.set_tracking_uri('https://dagshub.com/bibhukumarsingh355/Mlops-Capstone-project.mlflow')
+dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
 
 def load_model(file_path: str):
     try:
