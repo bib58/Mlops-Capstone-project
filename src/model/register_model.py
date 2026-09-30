@@ -1,5 +1,3 @@
-# register model
-
 import json
 import mlflow
 import logging
@@ -11,33 +9,11 @@ import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
 
-# Below code block is for production use
-# -------------------------------------------------------------------------------------
-# Set up DagsHub credentials for MLflow tracking
-dagshub_token = os.getenv("CAPSTONE_TEST")
-if not dagshub_token:
-    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
-
-os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
-
-dagshub_url = "https://dagshub.com"
-repo_owner = "vikashdas770"
-repo_name = "YT-Capstone-Project"
-# Set up MLflow tracking URI
-mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
-# -------------------------------------------------------------------------------------
-
-
-# Below code block is for local use
-# -------------------------------------------------------------------------------------
-# mlflow.set_tracking_uri('https://dagshub.com/vikashdas770/YT-Capstone-Project.mlflow')
-# dagshub.init(repo_owner='vikashdas770', repo_name='YT-Capstone-Project', mlflow=True)
-# -------------------------------------------------------------------------------------
+mlflow.set_tracking_uri('-----------------------------------')
+dagshub.init(repo_owner='---------', repo_name='-----------', mlflow=True)
 
 
 def load_model_info(file_path: str) -> dict:
-    """Load the model info from a JSON file."""
     try:
         with open(file_path, 'r') as file:
             model_info = json.load(file)
@@ -51,14 +27,11 @@ def load_model_info(file_path: str) -> dict:
         raise
 
 def register_model(model_name: str, model_info: dict):
-    """Register the model to the MLflow Model Registry."""
     try:
         model_uri = f"runs:/{model_info['run_id']}/{model_info['model_path']}"
         
-        # Register the model
         model_version = mlflow.register_model(model_uri, model_name)
         
-        # Transition the model to "Staging" stage
         client = mlflow.tracking.MlflowClient()
         client.transition_model_version_stage(
             name=model_name,
@@ -84,4 +57,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
