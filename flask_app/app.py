@@ -11,7 +11,6 @@ from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 import string
 import re
-import dagshub
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 warnings.filterwarnings("ignore")
@@ -61,18 +60,9 @@ def normalize_text(text):
 
     return text
 
-dagshub_token = os.getenv("CAPSTONE_TEST")
-if not dagshub_token:
-    raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
-
-os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
-os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
-
 dagshub_url = "https://dagshub.com"
-repo_owner = "bibhukumarsingh355"
-repo_name = "Mlops-Capstone-project"
 
-mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
+mlflow.set_tracking_uri(f'{dagshub_url}/bibhukumarsingh355/Mlops-Capstone-project.mlflow')
 
 
 app = Flask(__name__)
@@ -113,7 +103,12 @@ registered_model_version = None
 def get_registered_model_version():
     global registered_model_version
     if registered_model_version is None:
-        dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
+        dagshub_token = os.getenv("CAPSTONE_TEST")
+        if not dagshub_token:
+            raise EnvironmentError("CAPSTONE_TEST environment variable is not set")
+
+        os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_token
+        os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
         version = get_latest_model_version(model_name)
         if version is None:
             raise RuntimeError(
