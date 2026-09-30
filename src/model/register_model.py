@@ -12,7 +12,6 @@ warnings.filterwarnings("ignore")
 mlflow.set_tracking_uri('https://dagshub.com/bibhukumarsingh355/Mlops-Capstone-project.mlflow')
 dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
 
-
 def load_model_info(file_path: str) -> dict:
     try:
         with open(file_path, 'r') as file:
