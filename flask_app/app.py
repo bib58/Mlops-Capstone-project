@@ -62,7 +62,6 @@ def normalize_text(text):
     return text
 
 mlflow.set_tracking_uri('https://dagshub.com/bibhukumarsingh355/Mlops-Capstone-project.mlflow')
-dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
 
 app = Flask(__name__)
 registry = CollectorRegistry()
@@ -89,18 +88,41 @@ def get_latest_model_version(model_name):
         latest_version = client.get_latest_versions(model_name, stages=["None"])
     return latest_version[0].version if latest_version else None
 
-model_version = get_latest_model_version(model_name)
-if model_version is None:
-    raise RuntimeError(
-        f"No registered version found for '{model_name}'. Run model registration first."
-    )
-model_uri = f'models:/{model_name}/{model_version}'
-print(f"Fetching model from: {model_uri}")
-model = mlflow.pyfunc.load_model(model_uri)
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-vectorizer_path = os.path.join(project_root, 'models', 'vectorizer.pkl')
-with open(vectorizer_path, 'rb') as vectorizer_file:
-    vectorizer = pickle.load(vectorizer_file)
+model = None
+vectorizer = None
+
+
+def load_registered_model():
+    dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
+    model_version = get_latest_model_version(model_name)
+    if model_version is None:
+        raise RuntimeError(
+            f"No registered version found for '{model_name}'. Run model registration first."
+        )
+    model_uri = f'models:/{model_name}/{model_version}'
+    print(f"Fetching model from: {model_uri}")
+    return mlflow.pyfunc.load_model(model_uri)
+
+
+def get_model():
+    global model
+    if model is None:
+        model = load_registered_model()
+    return model
+
+
+def load_vectorizer():
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    vectorizer_path = os.path.join(project_root, 'models', 'vectorizer.pkl')
+    with open(vectorizer_path, 'rb') as vectorizer_file:
+        return pickle.load(vectorizer_file)
+
+
+def get_vectorizer():
+    global vectorizer
+    if vectorizer is None:
+        vectorizer = load_vectorizer()
+    return vectorizer
 
 
 @app.route("/")
@@ -118,10 +140,10 @@ def predict():
 
     text = request.form["text"]
     text = normalize_text(text)
-    features = vectorizer.transform([text])
+    features = get_vectorizer().transform([text])
     features_df = pd.DataFrame(features.toarray(), columns=[str(i) for i in range(features.shape[1])])
 
-    result = model.predict(features_df)
+    result = get_model().predict(features_df)
     prediction = result[0]
 
     PREDICTION_COUNT.labels(prediction=str(prediction)).inc()

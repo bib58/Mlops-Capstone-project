@@ -1,25 +1,29 @@
 import unittest
-from types import SimpleNamespace
 from unittest.mock import patch
+import flask_app.app as app_module
 
 
 class FakeModel:
     def predict(self, features):
         return [1]
 
+
+class FakeFeatures:
+    shape = (1, 1)
+
+    def toarray(self):
+        return [[0]]
+
+
+class FakeVectorizer:
+    def transform(self, texts):
+        return FakeFeatures()
+
+
 class FlaskAppTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        with patch("dagshub.init"), patch("mlflow.MlflowClient") as mlflow_client, patch(
-            "mlflow.pyfunc.load_model", return_value=FakeModel()
-        ):
-            mlflow_client.return_value.get_model_version_by_alias.return_value = (
-                SimpleNamespace(version="test")
-            )
-            from flask_app.app import app
-
-        cls.app = app
-        cls.client = app.test_client()
+        cls.client = app_module.app.test_client()
 
     def test_home_page(self):
         response = self.client.get('/')
@@ -27,7 +31,11 @@ class FlaskAppTests(unittest.TestCase):
         self.assertIn(b'<title>Sentiment Analysis</title>', response.data)
 
     def test_predict_page(self):
-        with patch("flask_app.app.normalize_text", side_effect=lambda text: text):
+        with (
+            patch.object(app_module, "load_registered_model", return_value=FakeModel()),
+            patch.object(app_module, "load_vectorizer", return_value=FakeVectorizer()),
+            patch.object(app_module, "normalize_text", side_effect=lambda text: text),
+        ):
             response = self.client.post('/predict', data=dict(text="I loved this movie, this was amazing!"))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(
