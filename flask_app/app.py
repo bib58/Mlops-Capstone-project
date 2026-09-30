@@ -77,6 +77,11 @@ model_name = "my_model"
 def get_latest_model_version(model_name):
     client = mlflow.MlflowClient()
     try:
+        return client.get_model_version_by_alias(model_name, "production").version
+    except MlflowException:
+        pass
+
+    try:
         return client.get_model_version_by_alias(model_name, "staging").version
     except MlflowException:
         pass

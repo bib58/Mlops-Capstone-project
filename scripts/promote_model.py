@@ -35,6 +35,12 @@ def promote_model():
         version=latest_version_staging,
         stage="Production"
     )
+    client.set_registered_model_alias(
+        name=model_name,
+        alias="production",
+        version=latest_version_staging
+    )
+    client.delete_registered_model_alias(name=model_name, alias="staging")
     print(f"Model version {latest_version_staging} promoted to Production")
 
 if __name__ == "__main__":
