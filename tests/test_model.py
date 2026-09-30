@@ -19,7 +19,6 @@ class TestModelLoading(unittest.TestCase):
         repo_owner = "bibhukumarsingh355"
         repo_name = "Mlops-Capstone-project"
 
-        # Set up MLflow tracking URI
         mlflow.set_tracking_uri(f'{dagshub_url}/{repo_owner}/{repo_name}.mlflow')
 
         # Load the new model from MLflow model registry

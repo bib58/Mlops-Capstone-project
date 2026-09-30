@@ -3,4 +3,5 @@ raw
 logs
 interim
 processed
-
+models/model.pkl
+models/vectorizer.pkl
