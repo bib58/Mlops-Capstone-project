@@ -111,6 +111,8 @@ def main():
             
             for metric_name, metric_value in metrics.items():
                 mlflow.log_metric(metric_name, metric_value)
+
+            mlflow.log_artifact('./models/vectorizer.pkl', artifact_path='preprocessing')
             
             if hasattr(clf, 'get_params'):
                 params = clf.get_params()

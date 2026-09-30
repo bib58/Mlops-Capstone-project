@@ -95,16 +95,25 @@ def get_latest_model_version(model_name):
 
 model = None
 vectorizer = None
+registered_model_version = None
+
+
+def get_registered_model_version():
+    global registered_model_version
+    if registered_model_version is None:
+        dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
+        version = get_latest_model_version(model_name)
+        if version is None:
+            raise RuntimeError(
+                f"No registered version found for '{model_name}'. Run model registration first."
+            )
+        registered_model_version = mlflow.MlflowClient().get_model_version(model_name, version)
+    return registered_model_version
 
 
 def load_registered_model():
-    dagshub.init(repo_owner='bibhukumarsingh355', repo_name='Mlops-Capstone-project', mlflow=True)
-    model_version = get_latest_model_version(model_name)
-    if model_version is None:
-        raise RuntimeError(
-            f"No registered version found for '{model_name}'. Run model registration first."
-        )
-    model_uri = f'models:/{model_name}/{model_version}'
+    model_version = get_registered_model_version()
+    model_uri = f'models:/{model_name}/{model_version.version}'
     print(f"Fetching model from: {model_uri}")
     return mlflow.pyfunc.load_model(model_uri)
 
@@ -117,8 +126,11 @@ def get_model():
 
 
 def load_vectorizer():
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    vectorizer_path = os.path.join(project_root, 'models', 'vectorizer.pkl')
+    model_version = get_registered_model_version()
+    vectorizer_path = mlflow.artifacts.download_artifacts(
+        run_id=model_version.run_id,
+        artifact_path='preprocessing/vectorizer.pkl',
+    )
     with open(vectorizer_path, 'rb') as vectorizer_file:
         return pickle.load(vectorizer_file)
 
