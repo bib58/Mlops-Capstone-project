@@ -35,7 +35,7 @@ jobs:
         env:
           CAPSTONE_TEST: ${{ secrets.CAPSTONE_TEST }}
         run: |
-          python -m tests.test_model.py
+          python -m tests.test_model
 
       - name: Promote model to production
         if: success()
