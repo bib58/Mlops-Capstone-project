@@ -62,6 +62,7 @@ def evaluate_model(clf, X_test: np.ndarray, y_test: np.ndarray) -> dict:
 
 def save_metrics(metrics: dict, file_path: str) -> None:
     try:
+        os.makedirs(os.path.dirname(file_path) or '.', exist_ok=True)
         with open(file_path, 'w') as file:
             json.dump(metrics, file, indent=4)
         logging.info('Metrics saved to %s', file_path)
@@ -71,6 +72,7 @@ def save_metrics(metrics: dict, file_path: str) -> None:
 
 def save_model_info(run_id: str, model_path: str, file_path: str) -> None:
     try:
+        os.makedirs(os.path.dirname(file_path) or '.', exist_ok=True)
         model_info = {'run_id': run_id, 'model_path': model_path}
         with open(file_path, 'w') as file:
             json.dump(model_info, file, indent=4)
